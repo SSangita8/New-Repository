@@ -4,13 +4,26 @@ export const appendEvent = async ({
   aggregateId,
   eventType,
   payload,
-  version
+  expectedVersion
 }) => {
+  const latestEvent = await Event.findOne({ aggregateId })
+    .sort({ version: -1 })
+    .select("version")
+    .lean();
+
+  const currentVersion = latestEvent?.version ?? 0;
+
+  if (currentVersion !== expectedVersion) {
+    throw new Error(
+      `Concurrency conflict. Expected version ${expectedVersion}, but current version is ${currentVersion}.`
+    );
+  }
+
   const event = await Event.create({
     aggregateId,
     eventType,
     payload,
-    version
+    version: currentVersion + 1
   });
 
   return event;
