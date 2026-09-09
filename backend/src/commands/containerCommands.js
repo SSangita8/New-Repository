@@ -1,19 +1,10 @@
-import {
-  appendEvent,
-  getLatestVersion
-} from "../services/eventStore.js";
+import { appendEvent } from "../services/eventStore.js";
 
 export const createContainer = async ({
   containerId,
   origin,
   destination
 }) => {
-  const currentVersion = await getLatestVersion(containerId);
-
-  if (currentVersion !== 0) {
-    throw new Error("Container already exists");
-  }
-
   const event = await appendEvent({
     aggregateId: containerId,
     eventType: "CONTAINER_CREATED",
@@ -21,7 +12,7 @@ export const createContainer = async ({
       origin,
       destination
     },
-    version: 1
+    expectedVersion: 0
   });
 
   return event;
