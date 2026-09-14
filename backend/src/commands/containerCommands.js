@@ -5,7 +5,7 @@ export const createContainer = async ({
   origin,
   destination
 }) => {
-  const event = await appendEvent({
+  return appendEvent({
     aggregateId: containerId,
     eventType: "CONTAINER_CREATED",
     payload: {
@@ -14,6 +14,49 @@ export const createContainer = async ({
     },
     expectedVersion: 0
   });
+};
 
-  return event;
+export const loadContainerOnShip = async ({
+  containerId,
+  shipName,
+  expectedVersion
+}) => {
+  return appendEvent({
+    aggregateId: containerId,
+    eventType: "LOADED_ON_SHIP",
+    payload: {
+      shipName
+    },
+    expectedVersion
+  });
+};
+
+export const recordTemperatureSpike = async ({
+  containerId,
+  temperature,
+  expectedVersion
+}) => {
+  return appendEvent({
+    aggregateId: containerId,
+    eventType: "TEMPERATURE_SPIKE",
+    payload: {
+      temperature
+    },
+    expectedVersion
+  });
+};
+
+export const markContainerArrived = async ({
+  containerId,
+  port,
+  expectedVersion
+}) => {
+  return appendEvent({
+    aggregateId: containerId,
+    eventType: "ARRIVED_AT_PORT",
+    payload: {
+      port
+    },
+    expectedVersion
+  });
 };
