@@ -5,7 +5,8 @@ const initialState = {
   status: null,
   location: null,
   temperature: null,
-  shipName: null
+  shipName: null,
+  destination: null
 };
 
 const applyEvent = (state, event) => {
@@ -15,7 +16,8 @@ const applyEvent = (state, event) => {
         ...state,
         containerId: event.aggregateId,
         status: "CREATED",
-        location: event.payload.origin
+        location: event.payload.origin,
+        destination: event.payload.destination
       };
 
     case "LOADED_ON_SHIP":
@@ -43,16 +45,34 @@ const applyEvent = (state, event) => {
   }
 };
 
+const replayEvents = (events) => {
+  return events.reduce(
+    (state, event) => applyEvent(state, event),
+    initialState
+  );
+};
+
 export const reconstructState = async (aggregateId) => {
   const events = await getEvents(aggregateId);
 
-  const state = events.reduce(
-    (currentState, event) => applyEvent(currentState, event),
-    initialState
+  return {
+    state: replayEvents(events),
+    events
+  };
+};
+
+export const reconstructStateAt = async (
+  aggregateId,
+  timestamp
+) => {
+  const events = await getEvents(aggregateId);
+
+  const historicalEvents = events.filter(
+    (event) => new Date(event.timestamp) <= new Date(timestamp)
   );
 
   return {
-    state,
-    events
+    state: replayEvents(historicalEvents),
+    events: historicalEvents
   };
 };
